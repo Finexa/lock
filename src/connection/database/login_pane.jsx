@@ -3,6 +3,7 @@ import React from 'react';
 import EmailPane from '../../field/email/email_pane';
 import UsernamePane from '../../field/username/username_pane';
 import PasswordPane from '../../field/password/password_pane';
+import PhoneNumberPasswordPane from '../../field/password/phone_number_password_pane';
 import { showResetPasswordActivity } from './actions';
 import { hasScreen, forgotPasswordLink } from './index';
 import * as l from '../../core/index';
@@ -24,7 +25,8 @@ export default class LoginPane extends React.Component {
       showForgotPasswordLink,
       showPassword,
       usernameInputPlaceholder,
-      usernameStyle
+      usernameStyle,
+      passwordStyle
     } = this.props;
 
     const headerText = instructions || null;
@@ -62,7 +64,7 @@ export default class LoginPane extends React.Component {
         </p>
       ) : null;
 
-    return (
+    return passwordStyle === 'password' ? (
       <div>
         {header}
         {fieldPane}
@@ -73,6 +75,16 @@ export default class LoginPane extends React.Component {
           hidden={!showPassword}
         />
         {dontRememberPassword}
+      </div>
+    ) : (
+      <div>
+        {header}
+        {fieldPane}
+        <PhoneNumberPasswordPane
+          instructions={i18n.html('passwordlessSMSInstructions')}
+          lock={lock}
+          placeholder={i18n.str('phoneNumberInputPlaceholder')}
+        />
       </div>
     );
   }
@@ -88,5 +100,6 @@ LoginPane.propTypes = {
   showForgotPasswordLink: PropTypes.bool.isRequired,
   showPassword: PropTypes.bool.isRequired,
   usernameInputPlaceholder: PropTypes.string.isRequired,
+  passwordStyle: PropTypes.oneOf(['password', 'phoneNumber']),
   usernameStyle: PropTypes.oneOf(['any', 'email', 'username'])
 };

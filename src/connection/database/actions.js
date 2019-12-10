@@ -2,6 +2,8 @@ import Immutable, { Map } from 'immutable';
 import { getEntity, read, swap, updateEntity } from '../../store/index';
 import webApi from '../../core/web_api';
 import { closeLock, logIn as coreLogIn, logInSuccess, validateAndSubmit } from '../../core/actions';
+import { setPassword } from '../../field/password';
+import { phoneNumberWithDiallingCode } from '../../field/phone_number';
 import * as l from '../../core/index';
 import * as c from '../../field/index';
 import {
@@ -12,12 +14,18 @@ import {
   setScreen,
   shouldAutoLogin,
   toggleTermsAcceptance as internalToggleTermsAcceptance,
-  additionalSignUpFields
+  additionalSignUpFields,
+  databasePasswordStyle
 } from './index';
 import * as i18n from '../../i18n';
 
 export function logIn(id, needsMFA = false) {
-  const m = read(getEntity, 'lock', id);
+  let m = read(getEntity, 'lock', id);
+
+  if (databasePasswordStyle(m) === 'phoneNumber') {
+    m = setPassword(m, phoneNumberWithDiallingCode(m));
+  }
+
   const usernameField = databaseLogInWithEmail(m) ? 'email' : 'username';
   const username = c.getFieldValue(m, usernameField);
   const params = {

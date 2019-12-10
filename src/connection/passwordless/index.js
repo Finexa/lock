@@ -17,7 +17,7 @@ export function initPasswordless(m, opts) {
     m = initLocation(m, opts.defaultLocation.toUpperCase());
   } else {
     m = sync(m, 'location', {
-      recoverResult: 'US',
+      recoverResult: 'NO',
       syncFn: (m, cb) => webAPI.getUserCountry(l.id(m), cb),
       successFn: (m, result) => initLocation(m, result)
     });

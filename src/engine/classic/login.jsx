@@ -7,6 +7,7 @@ import {
   databaseConnection,
   databaseUsernameStyle,
   databaseUsernameValue,
+  databasePasswordStyle,
   defaultDatabaseConnection,
   hasInitialScreen,
   hasScreen,
@@ -14,6 +15,7 @@ import {
 } from '../../connection/database/index';
 import { logIn as databaseLogIn } from '../../connection/database/actions';
 import { renderSignedInConfirmation } from '../../core/signed_in_confirmation';
+import { renderOptionSelection } from '../../field/index';
 import LoginSignUpTabs from '../../connection/database/login_sign_up_tabs';
 import * as l from '../../core/index';
 import { logIn as enterpriseLogIn, startHRD } from '../../connection/enterprise/actions';
@@ -72,6 +74,7 @@ const Component = ({ i18n, model }) => {
       : 'usernameInputPlaceholder';
 
   const usernameStyle = databaseUsernameStyle(model);
+  const passwordStyle = databasePasswordStyle(model);
 
   const login = (sso ||
     l.hasSomeConnections(model, 'database') ||
@@ -86,6 +89,7 @@ const Component = ({ i18n, model }) => {
       showForgotPasswordLink={showForgotPasswordLink}
       showPassword={showPassword}
       usernameInputPlaceholder={i18n.str(usernameInputPlaceholderKey)}
+      passwordStyle={passwordStyle}
       usernameStyle={usernameStyle}
     />
   );
@@ -113,7 +117,7 @@ export default class Login extends Screen {
   }
 
   renderAuxiliaryPane(lock) {
-    return renderSignedInConfirmation(lock);
+    return renderSignedInConfirmation(lock) || renderOptionSelection(lock);
   }
 
   renderTabs(model) {

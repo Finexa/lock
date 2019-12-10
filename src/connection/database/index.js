@@ -1,5 +1,6 @@
 import Immutable, { List, Map } from 'immutable';
 import * as l from '../../core/index';
+import webAPI from '../../core/web_api';
 import {
   hideInvalidFields,
   clearFields,
@@ -12,11 +13,23 @@ import sync from '../../sync';
 import trim from 'trim';
 import { defaultDirectory } from '../../core/tenant';
 import { findADConnectionWithoutDomain } from '../../connection/enterprise';
+import { initLocation } from '../../field/phone_number';
 
 const { get, initNS, tget, tset } = dataFns(['database']);
 
 export function initDatabase(m, options) {
   m = initNS(m, Immutable.fromJS(processDatabaseOptions(options)));
+  if (options.passwordStyle === 'phoneNumber') {
+    if (options.defaultLocation && typeof options.defaultLocation === 'string') {
+      m = initLocation(m, options.defaultLocation.toUpperCase());
+    } else {
+      m = sync(m, 'location', {
+        recoverResult: 'NO',
+        syncFn: (m, cb) => webAPI.getUserCountry(l.id(m), cb),
+        successFn: (m, result) => initLocation(m, result)
+      });
+    }
+  }
   m = resolveAdditionalSignUpFields(m);
   return m;
 }
@@ -62,13 +75,18 @@ function processDatabaseOptions(opts) {
     mustAcceptTerms,
     showTerms,
     signUpLink,
-    usernameStyle
+    usernameStyle,
+    passwordStyle
   } = opts;
 
   let { initialScreen, screens } = processScreenOptions(opts);
 
   if (!assertMaybeEnum(opts, 'usernameStyle', ['email', 'username'])) {
     usernameStyle = undefined;
+  }
+
+  if (!assertMaybeEnum(opts, 'passwordStyle', ['password', 'phoneNumber'])) {
+    passwordStyle = undefined;
   }
 
   if (!assertMaybeString(opts, 'defaultDatabaseConnection')) {
@@ -218,7 +236,8 @@ function processDatabaseOptions(opts) {
     showTerms,
     screens,
     signUpLink,
-    usernameStyle
+    usernameStyle,
+    passwordStyle
   })
     .filter(x => typeof x !== 'undefined')
     .toJS();
@@ -364,6 +383,10 @@ export function databaseUsernameStyle(m) {
 
 export function databaseLogInWithEmail(m) {
   return databaseUsernameStyle(m) === 'email';
+}
+
+export function databasePasswordStyle(m) {
+  return get(m, 'passwordStyle', 'password');
 }
 
 export function databaseUsernameValue(m, options = {}) {

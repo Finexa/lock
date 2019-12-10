@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 import { getField, getFieldValue, registerOptionField, setField } from './index';
 import locations from './phone-number/locations';
+import { setPassword } from './password';
 
 const locationOptions = Immutable.fromJS(
   locations.map(x => ({
@@ -17,7 +18,7 @@ function findLocation(isoCode) {
 }
 
 export function initLocation(m, isoCode) {
-  const location = findLocation(isoCode) || findLocation('US');
+  const location = findLocation(isoCode) || findLocation('NO');
   return registerOptionField(m, 'location', locationOptions, location.get('value'));
 }
 

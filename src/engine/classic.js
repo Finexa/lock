@@ -30,6 +30,8 @@ import {
 import { defaultDirectory, defaultDirectoryName } from '../core/tenant';
 import { setEmail } from '../field/email';
 import { setUsername } from '../field/username';
+import { setPhoneNumber, phoneNumberWithDiallingCode } from '../field/phone_number';
+import { setPassword } from '../field/password';
 import * as l from '../core/index';
 import KerberosScreen from '../connection/enterprise/kerberos_screen';
 import HRDScreen from '../connection/enterprise/hrd_screen';
@@ -110,9 +112,13 @@ function validateAllowedConnections(m) {
 }
 
 const setPrefill = m => {
-  const { email, username } = l.prefill(m).toJS();
+  const { email, username, phoneNumber } = l.prefill(m).toJS();
   if (typeof email === 'string') m = setEmail(m, email);
   if (typeof username === 'string') m = setUsername(m, username, 'username', false);
+  if (typeof phoneNumber === 'string') {
+    m = setPhoneNumber(m, phoneNumber, 'phoneNumber');
+    m = setPassword(m, phoneNumberWithDiallingCode(m));
+  }
   return m;
 };
 
